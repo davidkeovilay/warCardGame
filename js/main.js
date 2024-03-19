@@ -2,9 +2,13 @@
 document.querySelector('button').addEventListener('click', War)
  let deckId='',
   val1 = 0,
-  val2 = 0;
- 
-
+  val2 = 0,
+  war=0;
+  if (!localStorage.getItem('p1win')){
+    localStorage.setItem('p1win',0)
+    localStorage.setItem('p2win',0)
+  }
+  
 
 
  fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
@@ -19,13 +23,34 @@ document.querySelector('button').addEventListener('click', War)
 function War(){
   
   const url = `https://deckofcardsapi.com/api/deck/${deckID}/draw/?count=2`
-
   fetch(url)
       .then(res => res.json()) // parse response as JSON
       .then(data => {
+        if(data.remaining <2 ){
+          if(val1 > val2 ){
+            let win = Number(localStorage.getItem('p1win')) + 1 
+            localStorage.setItem('p1win', win)
+            document.querySelector('h4').innerText='Game over!!! Player 1 Wins'
+          }else if(val1 < val2 ){
+            let win = Number(localStorage.getItem('p2win')) + 1 
+            localStorage.setItem('p2win', win)
+            document.querySelector('h4').innerText='Game over!!! Player 2 Wins'
+          }
+          fetch(`https://www.deckofcardsapi.com/api/deck/${deckID}/shuffle/`)
+          .then(res => res.json()) // parse response as JSON
+          .then(data => {
+           deckID=data.deck_id
+           console.log(data)
+          })
+          .catch(err => {
+              console.log(`error ${err}`)
+          });
+  
+          
+        }
         let p1Val = convertToNum(data.cards[0].value),
-            p2Val = convertToNum(data.cards[1].value),
-            war = 0;
+            p2Val = convertToNum(data.cards[1].value);
+            
             pool = p1Val+p2Val + war;
              if (p1Val>p2Val){
               val1=val1 +Number(pool)
